@@ -79,7 +79,7 @@
 
 extern CWallet *pwalletMain;
 extern int64_t nLastCoinStakeSearchInterval;
-extern unsigned int nStakeTargetSpacing;
+extern unsigned int nTargetSpacing;
 double GetPoSKernelPS();
 
 ThemeManager *themeManager = new ThemeManager();

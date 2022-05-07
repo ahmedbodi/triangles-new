@@ -1276,23 +1276,17 @@ static const char *strDNSSeed[][2] = {};
 
 // hidden service seeds
 static const char *strMainNetOnionSeed[][1] = {
-    {"cv3pjwxjembvpkuo.onion"},
-    {"dkj6rkpe73xlar4n.onion"},
-    {"3abqfoqreyvvn3ar.onion"},
-    {"rrzb22urydhdjzlc.onion"},
-    {"s62fag4q7vndmlzv.onion"},
-    {"iceitzd3po4mi6bj.onion"},
-    {"wuwbjld7zusmhd4x.onion"},
-    {"265xliusr5tel7ju.onion"},
-    {"g4tjwah6tdmrhwel.onion"},
-    {"pdlwfclhd6sil4qy.onion"},
-    {"ydm4hyqr2uw3nyt4.onion"},
-	{"ikrogfme7we52isx.onion"},
+    {"ubxidutptf2sslhq.onion"},
+    {"sd2sx5xphxy3hqhq.onion"},
+    {"kg5xzj3ecasjdsqh.onion"},
+    {"4lwweoz7s6t7f4lj.onion"},
+    {"pp4w7hjqgsrndz5v.onion"},
+    {"yeyqqqztz6zzhenk.onion"},
+    {"sd2sx5xphxy3hqhq.onion"},
     {NULL}};
 
 static const char *strTestNetOnionSeed[][1] = {
-	{"yynpb5zlsdr4g5sp.onion"},
-	{"y4mr6k6w5wpvj3pa.onion"},
+    {"ubxidutptf2sslhq.onion"},
     {NULL}};
 
 void ThreadDNSAddressSeed(void *parg)

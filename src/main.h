@@ -27,23 +27,19 @@ class CInv;
 class CRequestTracker;
 class CNode;
 
-static const unsigned int MAX_BLOCK_SIZE = 1500000;
+
+static const unsigned int MAX_BLOCK_SIZE = 1000000;
 static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
 static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE/50;
 static const unsigned int MAX_ORPHAN_TRANSACTIONS = MAX_BLOCK_SIZE/100;
 static const unsigned int MAX_INV_SZ = 50000;
-static const int64_t MIN_TX_FEE = 100000;
-static const int64_t MIN_RELAY_TX_FEE = MIN_TX_FEE;
-static const int64_t MIN_TX_FEE_NEW = 10000;
-static const int64_t MIN_TX_FEE_NEW2 = 5000;
-static const int64_t MIN_RELAY_TX_FEE_NEW = MIN_TX_FEE_NEW;
-static const int64_t MIN_RELAY_TX_FEE_NEW2 = MIN_TX_FEE_NEW2;
-static const int64_t MAX_MONEY = 25000000 * COIN;
-static const int64_t MAX_PROOF_OF_STAKE_STABLE = 0.01 * COIN;	
-static const int64_t MIN_TXOUT_AMOUNT = MIN_TX_FEE_NEW;
-static const int SWITCH_BLOCK_HARD_FORK = 540000;
-static const int SWITCH_BLOCK_DSBUG_START = 1377000;
-static const int SWITCH_BLOCK_DSBUG_END = 1423000;
+
+static const int64_t MIN_TX_FEE = (1 * CENT) / 100;
+static const int64_t MIN_RELAY_TX_FEE = (1 * CENT) / 100;
+static const int64_t MAX_MONEY = 120000 * COIN;
+static const int64_t COIN_YEAR_REWARD =  33 * CENT; // 33% per year
+static const int64_t MAX_TRI_PROOF_OF_STAKE = 0.33 * COIN;
+static const int64_t MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 
 inline bool MoneyRange(int64_t nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 // Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp.
@@ -55,10 +51,10 @@ static const int fHaveUPnP = true;
 static const int fHaveUPnP = false;
 #endif
 
-static const uint256 hashGenesisBlock("0x000004e29458ef4f2e0abab544737b07344e6ff13718f7c2d12926166db07b5e");
-static const uint256 hashGenesisBlockTestNet("0x0000045eea7d9a4337a90e48d6269cc97b01874deac2aaf5a3e89c543329ab03");
-static const uint256 hashMerkleRootMainNet("0x48a457c277b124a06b568c0036d2c834e918d952c5b2dbf4035d173f50c8d14c");
-static const uint256 hashMerkleRootTestNet("0xcc3337810d74da69570c3f2778cb2bc7ad78d51d8791b13a6f8d9ee9e8457727");
+static const uint256 hashGenesisBlock("0x7e7a6e4dd5fe895106fca912dfbacaeaf2a89e76c6a588df8ff96e0e18b96021");
+static const uint256 hashGenesisBlockTestNet("0x7e7a6e4dd5fe895106fca912dfbacaeaf2a89e76c6a588df8ff96e0e18b96021");
+static const uint256 hashMerkleRootMainNet("0x27f77273afc4e7cca700b8564eed9a7cc7ee38e81189a8d57a98bc42f848d51e");
+static const uint256 hashMerkleRootTestNet("0x27f77273afc4e7cca700b8564eed9a7cc7ee38e81189a8d57a98bc42f848d51e");
 
 extern CScript COINBASE_FLAGS;
 extern CCriticalSection cs_main;
@@ -100,8 +96,6 @@ class CTxIndex;
 
 int64_t PastDrift(int64_t nTime);
 int64_t FutureDrift(int64_t nTime);
-int64_t GetMinTxFee();
-int64_t GetMinRelayTxFee();
 
 void RegisterWallet(CWallet* pwalletIn);
 void UnregisterWallet(CWallet* pwalletIn);
@@ -121,7 +115,7 @@ int GenerateMTRandom(unsigned int s, int range);
 bool CheckProofOfWork(uint256 hash, unsigned int nBits);
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake);
 int64_t GetProofOfWorkReward(int nHeight, int64_t nFees, const CBlockIndex* pindex);
-int64_t GetProofOfStakeReward(int64_t nCoinAge, const CBlockIndex* pindex);
+int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees);
 unsigned int ComputeMinWork(unsigned int nBase, int64_t nTime);
 unsigned int ComputeMinStake(unsigned int nBase, int64_t nTime, unsigned int nBlockTime);
 int GetNumBlocksOfPeers();
@@ -588,7 +582,7 @@ public:
      */
     int64_t GetValueIn(const MapPrevTx& mapInputs) const;
 
-    int64 GetMinFee(unsigned int nBlockSize = 1, enum GetMinFee_mode mode = GMF_BLOCK, unsigned int nBytes = 0) const;
+    int64_t GetMinFee(unsigned int nBlockSize = 1, enum GetMinFee_mode mode = GMF_BLOCK, unsigned int nBytes = 0) const;
 
     bool ReadFromDisk(CDiskTxPos pos, FILE** pfileRet=NULL)
     {

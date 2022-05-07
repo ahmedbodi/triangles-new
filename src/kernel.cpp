@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 The DeepOnion developers
+// Copyright (c) 2012-2013 The PPCoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -10,52 +10,19 @@
 using namespace std;
 
 extern unsigned int nStakeMaxAge;
-extern unsigned int nStakeTargetSpacing;
+extern unsigned int nTargetSpacing;
+
+// Modifier interval: time to elapse before new modifier is computed
+// Set to 20-minute for production network
+//unsigned int nModifierInterval = MODIFIER_INTERVAL;
 
 typedef std::map<int, unsigned int> MapModifierCheckpoints;
 
 // Hard checkpoints of stake modifiers to ensure they are deterministic
 static std::map<int, unsigned int> mapStakeModifierCheckpoints =
     boost::assign::map_list_of
-    (      0, 0xfd11f4e7u)
-    (   1000, 0x353653feu)
-    (  10000, 0x8c341084u)
-    (  50008, 0x9f0053f2u)
-    ( 100000, 0xaf212909u)
-    ( 150006, 0x3883af95u)
-    ( 200830, 0xf2daec0au)
-    ( 250008, 0x76bd1777u)
-    ( 300836, 0x18dbac5eu)
-    ( 350003, 0x17223fa8u)
-    ( 400002, 0xd1662b8fu)
-    ( 450000, 0x0fc0c8d3u)
-    ( 500001, 0x17ac1811u)
-    ( 550004, 0xcfb3340fu)
-    ( 600014, 0x74d7cf8cu)
-    ( 650002, 0xda8bce79u)
-    ( 700006, 0x42463050u)
-    ( 750001, 0x4d3e1fe6u)
-    ( 800002, 0x0c90205du)
-    ( 850000, 0x40f52778u)
-    ( 900012, 0xa3e7b278u)
-    ( 950005, 0xf364b26cu)
-    (1000006, 0x75801cf9u)
-    (1050000, 0x2f3cfae9u)
-    (1100013, 0xb92618a7u)
-    (1150015, 0x546f1436u)
-    (1200000, 0x4328bd8fu)
-    (1250000, 0xa3689d70u)
-    (1300021, 0x6fa62d97u)
-    (1350006, 0x469c6019u)
-    (1400000, 0xc9bbc27eu)
-    (1434023, 0x1b6aa26du)
+    (     0, 0x000000000e00670b )
 	;
-
-// Hard checkpoints of stake modifiers to ensure they are deterministic (testNet)
-static std::map<int, unsigned int> mapStakeModifierCheckpointsTestNet =
-    boost::assign::map_list_of
-    ( 0, 0xe00670bu )
-    ;
 
 // Get time weight
 int64_t GetWeight(int64_t nIntervalBeginning, int64_t nIntervalEnd)
@@ -138,8 +105,7 @@ static bool SelectBlockFromCandidates(vector<pair<int64_t, uint256> >& vSortedBy
             *pindexSelected = (const CBlockIndex*) pindex;
         }
     }
-    if (fDebug && GetBoolArg("-printstakemodifier"))
-        printf("SelectBlockFromCandidates: selection hash=%s\n", hashBest.ToString().c_str());
+    printf("SelectBlockFromCandidates: selection hash=%s\n", hashBest.ToString().c_str());
     return fSelected;
 }
 
@@ -170,16 +136,14 @@ bool ComputeNextStakeModifier(const CBlockIndex* pindexPrev, uint64_t& nStakeMod
     int64_t nModifierTime = 0;
     if (!GetLastStakeModifier(pindexPrev, nStakeModifier, nModifierTime))
         return error("ComputeNextStakeModifier: unable to get last modifier");
-    if (fDebug)
-    {
-        printf("ComputeNextStakeModifier: prev modifier=0x%016" PRIx64 " time=%s\n", nStakeModifier, DateTimeStrFormat(nModifierTime).c_str());
-    }
+    printf("ComputeNextStakeModifier: prev modifier=0x%016"PRIx64" time=%s\n", nStakeModifier, DateTimeStrFormat(nModifierTime).c_str());
+    
     if (nModifierTime / nModifierInterval >= pindexPrev->GetBlockTime() / nModifierInterval)
         return true;
 
     // Sort candidate blocks by timestamp
     vector<pair<int64_t, uint256> > vSortedByTimestamp;
-    vSortedByTimestamp.reserve(64 * nModifierInterval / nStakeTargetSpacing);
+    vSortedByTimestamp.reserve(64 * nModifierInterval / nTargetSpacing);
     int64_t nSelectionInterval = GetStakeModifierSelectionInterval();
     int64_t nSelectionIntervalStart = (pindexPrev->GetBlockTime() / nModifierInterval) * nModifierInterval - nSelectionInterval;
     const CBlockIndex* pindex = pindexPrev;
@@ -207,13 +171,10 @@ bool ComputeNextStakeModifier(const CBlockIndex* pindexPrev, uint64_t& nStakeMod
         nStakeModifierNew |= (((uint64_t)pindex->GetStakeEntropyBit()) << nRound);
         // add the selected block from candidates to selected list
         mapSelectedBlocks.insert(make_pair(pindex->GetBlockHash(), pindex));
-        if (fDebug && GetBoolArg("-printstakemodifier"))
-            printf("ComputeNextStakeModifier: selected round %d stop=%s height=%d bit=%d\n", nRound, DateTimeStrFormat(nSelectionIntervalStop).c_str(), pindex->nHeight, pindex->GetStakeEntropyBit());
+        printf("ComputeNextStakeModifier: selected round %d stop=%s height=%d bit=%d\n", nRound, DateTimeStrFormat(nSelectionIntervalStop).c_str(), pindex->nHeight, pindex->GetStakeEntropyBit());
     }
 
-    // Print selection map for visualization of the selected blocks
-    if (fDebug && GetBoolArg("-printstakemodifier"))
-    {
+
         string strSelectionMap = "";
         // '-' indicates proof-of-work blocks not selected
         strSelectionMap.insert(0, pindexPrev->nHeight - nHeightFirstCandidate + 1, '-');
@@ -232,11 +193,9 @@ bool ComputeNextStakeModifier(const CBlockIndex* pindexPrev, uint64_t& nStakeMod
             strSelectionMap.replace(item.second->nHeight - nHeightFirstCandidate, 1, item.second->IsProofOfStake()? "S" : "W");
         }
         printf("ComputeNextStakeModifier: selection height [%d, %d] map %s\n", nHeightFirstCandidate, pindexPrev->nHeight, strSelectionMap.c_str());
-    }
-    if (fDebug)
-    {
-        printf("ComputeNextStakeModifier: new modifier=0x%016" PRIx64 " time=%s\n", nStakeModifierNew, DateTimeStrFormat(pindexPrev->GetBlockTime()).c_str());
-    }
+
+        printf("ComputeNextStakeModifier: new modifier=0x%016"PRIx64" time=%s\n", nStakeModifierNew, DateTimeStrFormat(pindexPrev->GetBlockTime()).c_str());
+
 
     nStakeModifier = nStakeModifierNew;
     fGeneratedStakeModifier = true;
@@ -255,6 +214,10 @@ static bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64_t& nStakeModifi
     nStakeModifierTime = pindexFrom->GetBlockTime();
     int64_t nStakeModifierSelectionInterval = GetStakeModifierSelectionInterval();
     const CBlockIndex* pindex = pindexFrom;
+    
+    //triangles fixed nStakeModifierSelectionInterval
+    nStakeModifierSelectionInterval = 2 * nModifierInterval;
+
     // loop to find the stake modifier later by a selection interval
     while (nStakeModifierTime < pindexFrom->GetBlockTime() + nStakeModifierSelectionInterval)
     {
@@ -264,7 +227,11 @@ static bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64_t& nStakeModifi
                 return error("GetKernelStakeModifier() : reached best block %s at height %d from block %s",
                     pindex->GetBlockHash().ToString().c_str(), pindex->nHeight, hashBlockFrom.ToString().c_str());
             else
-                return false;
+  	        {
+                printf(">> nStakeModifierTime = %"PRId64", pindexFrom->GetBlockTime() = %"PRId64", nStakeModifierSelectionInterval = %"PRId64"\n", nStakeModifierTime, pindexFrom->GetBlockTime(), nStakeModifierSelectionInterval);
+
+              return false;
+	        }
         }
         pindex = pindex->pnext;
         if (pindex->GeneratedStakeModifier())
@@ -277,7 +244,7 @@ static bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64_t& nStakeModifi
     return true;
 }
 
-// DeepOnion kernel protocol
+// triangles kernel protocol
 // coinstake must meet hash target according to the protocol:
 // kernel (input 0) must meet the formula
 //     hash(nStakeModifier + txPrev.block.nTime + txPrev.offset + txPrev.nTime + txPrev.vout.n + nTime) < bnTarget * nCoinDayWeight
@@ -316,6 +283,7 @@ bool CheckStakeKernelHash(unsigned int nBits, const CBlock& blockFrom, unsigned 
     CBigNum bnCoinDayWeight = CBigNum(nValueIn) * GetWeight((int64_t)txPrev.nTime, (int64_t)nTimeTx) / COIN / (24 * 60 * 60);
     targetProofOfStake = CBigNum((bnCoinDayWeight * bnTargetPerCoinDay)).getuint256();
 
+	// printf(">>> CheckStakeKernelHash: nTimeWeight = %"PRI64d"\n", nTimeWeight);
     // Calculate hash
     CDataStream ss(SER_GETHASH, 0);
     uint64_t nStakeModifier = 0;
@@ -323,19 +291,26 @@ bool CheckStakeKernelHash(unsigned int nBits, const CBlock& blockFrom, unsigned 
     int64_t nStakeModifierTime = 0;
 
     if (!GetKernelStakeModifier(hashBlockFrom, nStakeModifier, nStakeModifierHeight, nStakeModifierTime, fPrintProofOfStake))
-        return false;
+	  {
+		    printf(">>> CheckStakeKernelHash: GetKernelStakeModifier return false\n");
+        
+		  return false;
+	  }
+    
+        printf(">>> CheckStakeKernelHash: passed GetKernelStakeModifier\n");
+
     ss << nStakeModifier;
 
     ss << nTimeBlockFrom << nTxPrevOffset << txPrev.nTime << prevout.n << nTimeTx;
     hashProofOfStake = Hash(ss.begin(), ss.end());
     if (fPrintProofOfStake)
     {
-        printf("CheckStakeKernelHash() : using modifier 0x%016" PRIx64 " at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
+        printf("CheckStakeKernelHash() : using modifier 0x%016"PRIx64" at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
             nStakeModifier, nStakeModifierHeight,
             DateTimeStrFormat(nStakeModifierTime).c_str(),
             mapBlockIndex[hashBlockFrom]->nHeight,
             DateTimeStrFormat(blockFrom.GetBlockTime()).c_str());
-        printf("CheckStakeKernelHash() : check modifier=0x%016" PRIx64 " nTimeBlockFrom=%u nTxPrevOffset=%u nTimeTxPrev=%u nPrevout=%u nTimeTx=%u hashProof=%s\n",
+        printf("CheckStakeKernelHash() : check modifier=0x%016"PRIx64" nTimeBlockFrom=%u nTxPrevOffset=%u nTimeTxPrev=%u nPrevout=%u nTimeTx=%u hashProof=%s\n",
             nStakeModifier,
             nTimeBlockFrom, nTxPrevOffset, txPrev.nTime, prevout.n, nTimeTx,
             hashProofOfStake.ToString().c_str());
@@ -343,19 +318,33 @@ bool CheckStakeKernelHash(unsigned int nBits, const CBlock& blockFrom, unsigned 
 
     // Now check if proof-of-stake hash meets target protocol
     if (CBigNum(hashProofOfStake) > bnCoinDayWeight * bnTargetPerCoinDay)
-        return false;
-    if (fDebug && !fPrintProofOfStake)
     {
-        printf("CheckStakeKernelHash() : using modifier 0x%016" PRIx64 " at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
+        // triangles fix: accept hash to get blockchain moving again with Pharao release (v 4.0.0.1) for first 10 blocks after release
+        //printf(">>>> pindexBest->nHeight %d\n",pindexBest->nHeight);
+        if (pindexBest->nHeight > 17691)
+        {
+                printf(">>> bnCoinDayWeight = %s, bnTargetPerCoinDay=%s\n",
+                bnCoinDayWeight.ToString().c_str(), bnTargetPerCoinDay.ToString().c_str());
+                printf(">>> CheckStakeKernelHash - hashProofOfStake too much\n");
+            return false;
+        }
+        else
+        {
+            //accept hash
+            printf(">>>> pindexBest->nHeight %d, Pharao release - hash accepted\n", pindexBest->nHeight);
+        }
+    }
+
+
+        printf("CheckStakeKernelHash() : using modifier 0x%016"PRIx64" at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
             nStakeModifier, nStakeModifierHeight, 
             DateTimeStrFormat(nStakeModifierTime).c_str(),
             mapBlockIndex[hashBlockFrom]->nHeight,
             DateTimeStrFormat(blockFrom.GetBlockTime()).c_str());
-        printf("CheckStakeKernelHash() : pass modifier=0x%016" PRIx64 " nTimeBlockFrom=%u nTxPrevOffset=%u nTimeTxPrev=%u nPrevout=%u nTimeTx=%u hashProof=%s\n",
+        printf("CheckStakeKernelHash() : pass modifier=0x%016"PRIx64" nTimeBlockFrom=%u nTxPrevOffset=%u nTimeTxPrev=%u nPrevout=%u nTimeTx=%u hashProof=%s\n",
             nStakeModifier,
             nTimeBlockFrom, nTxPrevOffset, txPrev.nTime, prevout.n, nTimeTx,
             hashProofOfStake.ToString().c_str());
-    }
     return true;
 }
 
@@ -408,16 +397,18 @@ unsigned int GetStakeModifierChecksum(const CBlockIndex* pindex)
     ss << pindex->nFlags << pindex->hashProofOfStake << pindex->nStakeModifier;
     uint256 hashChecksum = Hash(ss.begin(), ss.end());
     hashChecksum >>= (256 - 32);
+         printf("stake checksum: 0x%016"PRIx64"", hashChecksum.Get64());
     return hashChecksum.Get64();
 }
 
 // Check stake modifier hard checkpoints
 bool CheckStakeModifierCheckpoints(int nHeight, unsigned int nStakeModifierChecksum)
 {
-	// printf(">> Height = %d, nStakeModifierChecksum = %x\n", nHeight, nStakeModifierChecksum);
-    MapModifierCheckpoints& checkpoints = (fTestNet ? mapStakeModifierCheckpointsTestNet : mapStakeModifierCheckpoints);
-
-    if (checkpoints.count(nHeight))
-        return nStakeModifierChecksum == checkpoints[nHeight];
-    return true;
+    if (fTestNet) return true; // Testnet has no checkpoints
+    
+    if (mapStakeModifierCheckpoints.count(nHeight))
+        return nStakeModifierChecksum == mapStakeModifierCheckpoints[nHeight];
+	   return true;
 }
+
+
