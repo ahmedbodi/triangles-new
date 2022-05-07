@@ -1,9 +1,11 @@
-packages:=boost openssl libevent zeromq libseccomp
+packages:=boost openssl libevent zeromq
 
 qt_native_packages = native_protobuf
 qt_packages = qrencode protobuf zlib
 
 qt_linux_packages:=qt expat dbus libxcb xcb_proto libXau xproto freetype fontconfig libX11 xextproto libXext xtrans
+
+linux_packages:=libseccomp
 
 rapidcheck_packages = rapidcheck
 
