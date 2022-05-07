@@ -5,7 +5,7 @@ qt_packages = qrencode protobuf zlib
 
 qt_linux_packages:=qt expat dbus libxcb xcb_proto libXau xproto freetype fontconfig libX11 xextproto libXext xtrans
 
-linux_packages:=libseccomp
+linux_packages:=libseccomp libcap
 
 rapidcheck_packages = rapidcheck
 
