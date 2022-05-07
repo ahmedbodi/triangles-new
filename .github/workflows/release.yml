@@ -19,12 +19,12 @@ jobs:
           - name: ARM 32-bit
             os: ubuntu-18.04
             host: arm-linux-gnueabihf
-            apt_get: python3 g++-arm-linux-gnueabihf
+            apt_get: python3 g++-arm-linux-gnueabihf gettext
 
           - name: AARCH64
             os: ubuntu-18.04
             host: aarch64-linux-gnu
-            apt_get: python3 g++-aarch64-linux-gnu
+            apt_get: python3 g++-aarch64-linux-gnu gettext
 
           - name: Win64
             os: ubuntu-18.04
@@ -34,12 +34,12 @@ jobs:
           - name: 32-bit + dash
             os: ubuntu-18.04
             host: i686-pc-linux-gnu
-            apt_get: g++-multilib python3-zmq
+            apt_get: g++-multilib python3-zmq gettext
 
           - name: x86_64 Linux
             os: ubuntu-18.04
             host: x86_64-unknown-linux-gnu
-            apt_get: python3-zmq qtbase5-dev qttools5-dev-tools libqt5svg5-dev libqt5charts5-dev libqrencode-dev protobuf-compiler libdbus-1-dev libharfbuzz-dev libprotobuf-dev
+            apt_get: python3-zmq qtbase5-dev qttools5-dev-tools libqt5svg5-dev libqt5charts5-dev libqrencode-dev protobuf-compiler libdbus-1-dev libharfbuzz-dev libprotobuf-dev gettext
             dep_opts: NO_QT=1 NO_UPNP=1 DEBUG=1 ALLOW_HOST_PACKAGES=1
 
           - name: macOS 10.10
