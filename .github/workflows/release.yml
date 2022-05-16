@@ -29,7 +29,7 @@ jobs:
           - name: Win64
             os: ubuntu-18.04
             host: x86_64-w64-mingw32
-            apt_get: python3 nsis g++-mingw-w64-x86-64 wine-binfmt wine64
+            apt_get: python3 nsis g++-mingw-w64-x86-64 wine-binfmt wine64 binutils-mingw-w64
 
           - name: 32-bit + dash
             os: ubuntu-18.04
