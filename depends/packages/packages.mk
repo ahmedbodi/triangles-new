@@ -4,7 +4,7 @@ qt_packages = zlib
 
 qrencode_packages = qrencode
 
-qt_linux_packages:=qt expat libxcb xcb_proto libXau xproto freetype fontconfig libseccomp libcap attr
+qt_linux_packages:=qt expat libxcb xcb_proto libXau xproto freetype fontconfig libX11 xextproto libXext xtrans libseccomp libcap attr
 qt_android_packages=qt
 
 rapidcheck_packages = rapidcheck
