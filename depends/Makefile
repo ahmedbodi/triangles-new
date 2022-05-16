@@ -1,5 +1,8 @@
 .NOTPARALLEL :
 
+print-%:
+	@echo $* = $($*)
+
 SOURCES_PATH ?= $(BASEDIR)/sources
 BASE_CACHE ?= $(BASEDIR)/built
 SDK_PATH ?= $(BASEDIR)/SDKs
@@ -21,7 +24,6 @@ BUILD_ID_SALT ?= salt
 host:=$(BUILD)
 ifneq ($(HOST),)
 host:=$(HOST)
-host_toolchain:=$(HOST)-
 endif
 
 ifneq ($(DEBUG),)
@@ -52,6 +54,12 @@ full_host_os:=$(subst $(host_arch)-$(host_vendor)-,,$(canonical_host))
 host_os:=$(findstring linux,$(full_host_os))
 host_os+=$(findstring darwin,$(full_host_os))
 host_os+=$(findstring mingw32,$(full_host_os))
+
+ifeq (android,$(findstring android,$(full_host_os)))
+host_os:=android
+endif
+
+
 host_os:=$(strip $(host_os))
 ifeq ($(host_os),)
 host_os=$(full_host_os)
@@ -166,6 +174,12 @@ $(host_prefix)/share/config.site: check-packages
 
 check-packages: check-sources
 
+clean-all: clean
+	@rm -rf $(SOURCES_PATH) x86_64* i686* mips* arm* aarch64* powerpc* riscv32* riscv64* s390x*
+
+clean:
+	@rm -rf $(WORK_PATH) $(BASE_CACHE) $(BUILD)
+
 install: check-packages $(host_prefix)/share/config.site
 
 
@@ -179,4 +193,6 @@ download-win:
 	@$(MAKE) -s HOST=x86_64-w64-mingw32 download-one
 download: download-osx download-linux download-win
 
-.PHONY: install cached download-one download-osx download-linux download-win download check-packages check-sources
+$(foreach package,$(all_packages),$(eval $(call ext_add_stages,$(package))))
+
+.PHONY: install cached clean clean-all download-one download-osx download-linux download-win download check-packages check-sources
