@@ -24,22 +24,22 @@ extern const std::string CLIENT_DATE;
 //
 // database format versioning
 //
-static const int DATABASE_VERSION = 70508;
+static const int DATABASE_VERSION = 70509;
 
 //
 // network protocol versioning
 //
 
-static const int PROTOCOL_VERSION = 80012;
-static const int MIN_PROTO_VERSION = 80012;
+static const int PROTOCOL_VERSION = 70204;
+static const int MIN_PROTO_VERSION = 70204;
 
 // nTime field added to CAddress, starting with this version;
 // if possible, avoid requesting addresses nodes older than this
-static const int CADDR_TIME_VERSION = 31402;
+static const int CADDR_TIME_VERSION = 70200;
 
 // only request blocks from nodes outside this range of versions
-static const int NOBLKS_VERSION_START = 60002;
-static const int NOBLKS_VERSION_END = 60006;
+static const int NOBLKS_VERSION_START = 0;
+static const int NOBLKS_VERSION_END = 70203;
 
 // BIP 0031, pong message, is enabled for all versions AFTER this one
 static const int BIP0031_VERSION = 60000;

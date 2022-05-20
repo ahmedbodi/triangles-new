@@ -424,11 +424,13 @@ class CNode
             return;
 
         // Set the size
-        unsigned int nSize = vSend.size() - nMessageStart;
+        //unsigned int nSize = vSend.size() - nMessageStart;
+        unsigned int nSize = vSend.size() - CMessageHeader::HEADER_SIZE;
         memcpy((char *)&vSend[nHeaderStart] + CMessageHeader::MESSAGE_SIZE_OFFSET, &nSize, sizeof(nSize));
 
         // Set the checksum
-        uint256 hash = Hash(vSend.begin() + nMessageStart, vSend.end());
+	uint256 hash = Hash(vSend.begin() + CMessageHeader::HEADER_SIZE, vSend.end());
+        //uint256 hash = Hash(vSend.begin() + nMessageStart, vSend.end());
         unsigned int nChecksum = 0;
         memcpy(&nChecksum, &hash, sizeof(nChecksum));
         assert(nMessageStart - nHeaderStart >= CMessageHeader::CHECKSUM_OFFSET + sizeof(nChecksum));

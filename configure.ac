@@ -13,8 +13,9 @@ AC_CANONICAL_HOST
 AH_TOP([#ifndef DEEPONION_CONFIG_H])
 AH_TOP([#define DEEPONION_CONFIG_H])
 AH_BOTTOM([#endif //DEEPONION_CONFIG_H])
-AX_SUBDIRS_CONFIGURE([tor], [[--disable-unittests], [--disable-system-torrc], [--disable-systemd], [--disable-lzma], [--disable-asciidoc], [--with-openssl-dir=$($PKG_CONFIG --variable=libdir openssl)], [CFLAGS=$($PKG_CONFIG --cflags openssl) -fPIC -O2]])
-
+# This is the original line, the modified uncommented line removes reported errors. Just leaving in so we have a history in GIT. TODO: Remove commented line
+#AX_SUBDIRS_CONFIGURE([tor], [[--disable-unittests], [--disable-zstd], [--disable-system-torrc], [--disable-systemd], [--disable-lzma], [--disable-asciidoc], [--with-openssl-dir=$($PKG_CONFIG --variable=libdir openssl)], [CFLAGS=$($PKG_CONFIG --cflags openssl) -fPIC -O2]])
+AX_SUBDIRS_CONFIGURE([tor], [[--disable-zstd], [--disable-unittests], [--disable-system-torrc], [--disable-systemd], [--disable-lzma], [--disable-asciidoc], [--with-openssl-dir=$($PKG_CONFIG openssl)], [CFLAGS=$($PKG_CONFIG --cflags openssl) -fPIC -O2]])
 
 # This m4 will only be used if a system copy cannot be found. This is helpful
 # on systems where autotools are installed but the pkg-config macros are not in
@@ -177,12 +178,14 @@ fi
 ##       compatibility with the legacy buildsystem.
 ##
 if test "x$CXXFLAGS_overridden" = "xno"; then
-  CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter"
+#  CXXFLAGS="$CXXFLAGS -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter"
+   CXXFLAGS="$CXXFLAGS"
 fi
 CPPFLAGS="$CPPFLAGS -DBOOST_SPIRIT_THREADSAFE -DHAVE_BUILD_INFO -D__STDC_FORMAT_MACROS"
 
 if test "x$CFLAGS_overridden" = "xno"; then
-  CFLAGS="$CFLAGS -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -std=c99"
+#  CFLAGS="$CFLAGS -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -std=c99"
+   CFLAGS="$CFLAGS"
 fi
 CFLAGS="$CFLAGS -DHAVE_BUILD_INFO"
 

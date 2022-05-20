@@ -318,8 +318,18 @@ static bool IsCanonicalSignature(const valtype &vchSig) {
     // the S value is above 2^255, which isn't necessary (its negative
     // modulo the order of the curve could have been used).
     if (nLenS > 32)
-        return error("Non-canonical signature: S value is unnecessarily high");
+    {
+       // high signature S values generated prior to Pharao (version 4) are automatically accepted
+       if (pindexBest->nHeight > 17691) //CRAPCHAIN_CUTOFF_BLOCK)
+       {
+           return error("Non-canonical signature: S value is unnecessarily high");
+       }
+       else
+       {
+           printf("IsCanonicalSignature(): pre-Pharao version signature S value accepted for block %d\n", pindexBest->nHeight);
+       }
 
+    }
     return true;
 }
 

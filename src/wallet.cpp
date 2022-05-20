@@ -18,8 +18,8 @@
 using namespace std;
 extern unsigned int nStakeMaxAge;
 
-unsigned int nStakeSplitAge = 20 * 24 * 60 * 60;
-int64_t nStakeCombineThreshold = 100 * COIN;
+unsigned int nStakeSplitAge = 1 * 3 * 60 * 60;
+int64_t nStakeCombineThreshold = 20 * COIN;
 
 /*
 # BTC checkpoint #1
@@ -1508,9 +1508,9 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64_t> > &vecSend, 
                 // if sub-cent change is required, the fee must be raised to at least Min Tx Fee
                 // or until nChange becomes zero
                 // NOTE: this depends on the exact behaviour of GetMinFee
-                if (nFeeRet < GetMinTxFee() && nChange > 0 && nChange < CENT)
+                if (nFeeRet < MIN_TX_FEE && nChange > 0 && nChange < CENT)
                 {
-                    int64 nMoveToFee = min(nChange, GetMinTxFee() - nFeeRet);
+                    int64 nMoveToFee = min(nChange, MIN_TX_FEE - nFeeRet);
                     nChange -= nMoveToFee;
                     nFeeRet += nMoveToFee;
                 }
@@ -1874,7 +1874,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         if (!txNew.GetCoinAge(txdb, nCoinAge))
             return error("CreateCoinStake : failed to calculate coin age");
 
-        int64_t nReward = GetProofOfStakeReward(nCoinAge, pindexBest);
+        int64_t nReward = GetProofOfStakeReward(nCoinAge, nFees);
         if (nReward <= 0)
             return false;
 
