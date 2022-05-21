@@ -1,8 +1,8 @@
-/* src/config/deeponion-config.h.in.  Generated from configure.ac by autoheader.  */
+/* src/config/verge-config.h.in.  Generated from configure.ac by autoheader.  */
 
-#ifndef DEEPONION_CONFIG_H
+#ifndef VERGE_CONFIG_H
 
-#define DEEPONION_CONFIG_H
+#define VERGE_CONFIG_H
 
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
@@ -427,4 +427,4 @@
 /* Define for large files, on AIX-style hosts. */
 #undef _LARGE_FILES
 
-#endif //DEEPONION_CONFIG_H
+#endif //VERGE_CONFIG_H

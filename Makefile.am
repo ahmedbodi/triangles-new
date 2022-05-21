@@ -1,8 +1,8 @@
-ACLOCAL_AMFLAGS = -I src/m4
+ACLOCAL_AMFLAGS = -I build-aux/m4
 SUBDIRS = tor src
 .PHONY: deploy FORCE
 
-GZIP_ENV="-9n"
+override GZIP_ENV = "-9n"
 
 BITCOIND_BIN=$(top_builddir)/src/DeepOniond$(EXEEXT)
 BITCOIN_QT_BIN=$(top_builddir)/src/qt/DeepOnion-qt$(EXEEXT)
@@ -155,12 +155,6 @@ total.coverage/.dirstamp: total_coverage.info
 
 cov: test_bitcoin.coverage/.dirstamp total.coverage/.dirstamp
 
-endif
-
-if USE_COMPARISON_TOOL
-check-local:
-	$(MKDIR_P) qa/tmp
-	@qa/pull-tester/run-bitcoind-for-test.sh $(JAVA) -jar $(JAVA_COMPARISON_TOOL) qa/tmp/compTool $(COMPARISON_TOOL_REORG_TESTS)
 endif
 
 EXTRA_DIST = $(top_srcdir)/share/genbuild.sh qa/pull-tester/pull-tester.sh qa/rpc-tests $(DIST_DOCS) $(WINDOWS_PACKAGING) $(OSX_PACKAGING)

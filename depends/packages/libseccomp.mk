@@ -1,17 +1,14 @@
 package=libseccomp
-$(package)_version=2.4.2
-$(package)_download_path=https://github.com/seccomp/libseccomp/releases/download/v2.4.2/
+$(package)_version=2.3.3
+$(package)_download_path=https://github.com/seccomp/libseccomp/releases/download/v$($(package)_version)/
 $(package)_file_name=$(package)-$($(package)_version).tar.gz
-$(package)_sha256_hash=b54f27b53884caacc932e75e6b44304ac83586e2abe7a83eca6daecc5440585b
+$(package)_sha256_hash=7fc28f4294cc72e61c529bedf97e705c3acf9c479a8f1a3028d4cd2ca9f3b155
 
-#define $(package)_preprocess_cmds
-#  ./autogen.sh
-#endef
+ifneq ($(host_os),mingw32)
+ifneq ($(host_os),darwin)
 
 define $(package)_set_vars
-  $(package)_config_opts=--disable-shared --disable-openssl --disable-libseccomp-regress --disable-samples
-  $(package)_config_opts_release=--disable-debug-mode
-  $(package)_config_opts_linux=--with-pic
+  $(package)_config_opts=--disable-static
 endef
 
 define $(package)_config_cmds
@@ -26,5 +23,5 @@ define $(package)_stage_cmds
   $(MAKE) DESTDIR=$($(package)_staging_dir) install
 endef
 
-define $(package)_postprocess_cmds
-endef
+endif
+endif

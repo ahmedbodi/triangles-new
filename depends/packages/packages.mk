@@ -1,11 +1,9 @@
-packages:=boost libevent openssl
+packages:=boost openssl libevent libcap libseccomp zeromq
 
-qt_packages = zlib
+qt_native_packages = native_protobuf
+qt_packages = qrencode protobuf zlib
 
-qrencode_packages = qrencode
-
-qt_linux_packages:=qt expat libxcb xcb_proto libXau xproto freetype fontconfig libX11 xextproto libXext xtrans libseccomp libcap attr
-qt_android_packages=qt
+qt_linux_packages:=qt expat dbus libxcb xcb_proto libXau xproto freetype fontconfig libX11 xextproto libXext xtrans
 
 rapidcheck_packages = rapidcheck
 
@@ -13,8 +11,6 @@ qt_darwin_packages=qt
 qt_mingw32_packages=qt
 
 wallet_packages=bdb
-
-zmq_packages=zeromq
 
 upnp_packages=miniupnpc
 
